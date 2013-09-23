@@ -50,6 +50,10 @@ function migrate_rpforum_migrate_api() {
     // argument is required. The group_name is optional (defaulting to 'default')
     // but specifying it is a best practice.
     'migrations' => array(
+      'RPForumForums' => array(
+        'class_name' => 'RPForumForumsMigration',
+        'group_name' => 'rpforum',
+      ),
       'RPForumTopic' => array(
         'class_name' => 'RPForumTopicMigration',
         'group_name' => 'rpforum',
