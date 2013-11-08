@@ -93,7 +93,10 @@ class RPForumTopicMigration extends Migration {
     $query->fields('tn', array('nid', 'tid'));
     $query->fields('rp', array('vid','nid','field_body2_value','field_parent_node_value'));
     $query->condition('field_parent_node_value', -1);
-    $query->condition('rp.nid', 442);
+
+    // A hack to test importing just 1 node
+    // $query->condition('rp.nid', 442);
+
     return $query;
   }
 }
@@ -124,7 +127,8 @@ class RPForumPostMigration extends Migration {
     $this->addFieldMapping('nid', 'field_parent_node_value')
       ->sourceMigration('RPForumTopic');;
     $this->addFieldMapping('uid', 'uid');
-    $this->addFieldMapping('subject', 'title');
+    $this->addFieldMapping('subject', 'title')
+      ->callbacks(array($this, 'trimTitle'));
     $this->addFieldMapping('comment_body', 'field_body2_value')
       ->arguments(array('format' => 'panopoly_html_text'));
     $this->addFieldMapping('created', 'created');
@@ -145,7 +149,18 @@ class RPForumPostMigration extends Migration {
     $query->leftJoin('node', 'n', 'rp.nid = n.nid');
     $query->fields('n', array('nid', 'title', 'uid', 'created', 'changed'));
     $query->fields('rp', array('vid','nid','field_body2_value','field_parent_node_value'));
-    $query->condition('field_parent_node_value', 442);
+
+    // Dont pick out main topics, only nodes that are replies
+    $query->condition('field_parent_node_value', -1, '<>');
+
+    // A hack to test importing just 1 node
+    // $query->condition('field_parent_node_value', 442);
+
     return $query;
+  }
+
+  protected function trimTitle($value) {
+    $value = drupal_substr($value, 0, 64);
+    return $value;
   }
 }
